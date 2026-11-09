@@ -1,0 +1,14 @@
+..................                                                       [100%]
+=============================== warnings summary ===============================
+tests/test_gcn.py::test_cora_public_split_and_test_node_order
+tests/test_gcn.py::test_cora_public_split_and_test_node_order
+tests/test_gcn.py::test_cora_public_split_and_test_node_order
+  /Users/chiyixiao/study/10714/final_project/apps/gcn.py:81: DeprecationWarning: Please import `csr_matrix` from the `scipy.sparse` namespace; the `scipy.sparse.csr` namespace is deprecated and will be removed in SciPy 2.0.0.
+    return pickle.load(f, encoding="latin1")
+
+tests/test_gcn.py::test_cora_public_split_and_test_node_order
+  /Users/chiyixiao/study/10714/final_project/tests/test_gcn.py:111: DeprecationWarning: Please import `csr_matrix` from the `scipy.sparse` namespace; the `scipy.sparse.csr` namespace is deprecated and will be removed in SciPy 2.0.0.
+    raw = pickle.load(f, encoding="latin1").tocsr()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+18 passed, 4 warnings in 0.09s

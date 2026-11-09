@@ -1,0 +1,3 @@
+Cora citation network, Planetoid public split.
+Source: https://github.com/tkipf/gcn/tree/39a4089fe72ad9f055ed6fdb9746abdcfebc4d81/gcn/data
+The eight ind.cora.* files are unmodified dataset inputs. SHA256SUMS records their hashes.

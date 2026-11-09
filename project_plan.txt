@@ -1,0 +1,82 @@
+Sparse Matrix Support and Graph Neural Networks in Needle
+Two-person project plan for the November 10, 2026 mentor discussion
+
+Project scope
+
+We propose to add a CPU operator to Needle for multiplying a two-dimensional sparse matrix by a dense feature matrix. It will support first-order differentiation with respect to the stored values and the dense input. We will train a two-layer Graph Convolutional Network (GCN) on Cora using this operator and compare it with the same model using dense Needle operations.
+
+We want the mentor's feedback on three decisions.
+1. Is a CPU implementation of this operator, its two gradients, and an end-to-end GCN sufficient for two students?
+2. In Cora the graph is fixed. Is it appropriate to demonstrate value gradients in operator tests and measure GCN training with only model weights updated?
+3. Are dense-reference tests and a matched Cora experiment sufficient evidence? If time remains, would a small experiment varying graph density add more value than additional training runs?
+
+Division of work
+
+Member A owns sparse storage, computation, and memory measurements. A will implement CSR construction, the CPU forward and backward kernels, and their Needle interface. A will document which arrays are allocated, measure adjacency storage and peak process memory, and write the design and memory sections of the report.
+
+Member B owns the independent reference, data, model, and training experiments. B will write dense reference tests, load Cora and its data split, implement the GCN and masked loss, and run both models through the same training script. B will record training time and accuracy and write the model and evaluation sections.
+
+Both members agree on the interface before coding. B can build the model using dense multiplication while A works on the sparse operator. At integration, B runs the independent tests on A's operator and A checks that both versions of B's model use the same graph, weights, and loss. Each member runs one part of the other's work in a clean Colab session.
+
+First coding tasks
+
+Work from a private project copy of hw4_extra/assignment. A starts in src/ndarray_backend_cpu.cc and uses the MatMul class in python/needle/ops/ops_mathematic.py as an example of a Needle TensorOp. B starts with a small operator test and a dense graph layer in apps/. Both explicitly select ndl.cpu() so the implementations run on Needle's native CPU backend.
+
+Agree on Y = spmm(A, X). If A has shape (m, n) and X has shape (n, f), Y has shape (m, f). A stores row offsets and column indices as fixed integer arrays and stored values as a float32 Needle tensor. The operator receives values and X as tensor inputs so backward can return a gradient for each. The row offsets and column indices stay with the operator as metadata. At construction, validate dimensions and index bounds. Combine repeated coordinates when building CSR from weighted edge lists.
+
+Use the following example as the first acceptance test.
+  A = [[0, 2, 0], [3, 0, 4]]
+  row_offsets = [0, 1, 3], col_indices = [1, 0, 2], values = [2, 3, 4]
+  X = [[1], [2], [-1]]
+  Expected Y = [[4], [-1]]
+  For loss = Y[0,0] + 2 * Y[1,0], expected X.grad = [[6], [2], [8]]
+  and expected values.grad = [2, 2, -2] in CSR order.
+
+A's forward kernel visits each stored entry (i, j) and adds its value times X[j, :] to output row i. For output gradient G, the dense input gradient is A.T @ G. The gradient for a stored value at (i, j) is dot(G[i, :], X[j, :]). Both backward computations can visit only stored entries and accumulate directly into their output buffers.
+
+B will compare forward outputs, X gradients, and stored-value gradients against dense Needle. Include a rectangular matrix, an empty row, a repeated input coordinate, and multiple feature columns. Use a nonuniform output gradient to catch incorrect transpose and row indexing. On a small case, also check selected entries of each analytical gradient by perturbing one input value at a time and measuring the change in scalar loss.
+
+GCN and experiment design
+
+B will load Cora's public split and verify that node features, labels, and masks use the same node order. Build an undirected binary adjacency, merge duplicate edges, add one self-loop per node, and compute symmetric degree normalization once. Construct both representations from those same normalized entries. Keep node features dense. For a layer with weights W, compute X @ W first and then multiply by the normalized adjacency. Apply ReLU between the two layers. Compute per-node cross entropy with Needle operations, multiply by the training mask, and divide by the number of training nodes.
+
+For a correctness run, use the same initial weights in both models and disable dropout. Compare logits, masked loss, both weight gradients, and the weights after one optimizer step. Start with float32 tolerances of rtol=1e-4 and atol=1e-5 for small analytical comparisons. Record the maximum error and investigate any larger discrepancy.
+
+For the training comparison, the normalized adjacency is fixed. The HW4 Extra autograd loop propagates gradients to every tensor input of an operation. A and B will each provide a fixed-adjacency operation for their path that takes the feature matrix as its only tensor input and returns its gradient. This lets both models measure the work required for a fixed graph. A's general spmm will still support trainable values and will be tested separately.
+
+Use the same CPU session type, data split, starting weights, optimizer, and epoch count. Use a short pilot to set an affordable epoch count for both models. Choose settings using validation accuracy, then report test accuracy for the selected settings. For timing, exclude data loading and compilation, warm up both paths, and record median training time per epoch. For memory, count CSR values, indices, and row offsets in bytes and compare with dense adjacency bytes. Also measure peak process memory in separate fresh processes, each loading only its own representation. Save the settings, seeds, and raw measurements with the results.
+
+Schedule and acceptance criteria
+
+Nov 9 - Previously scheduled mentor check-in. Collect any notes relevant to the scope discussion and prepare the hand-worked example above.
+
+Nov 10 - Discuss feasibility with the mentor. A presents the operator and both gradient rules. B presents the dense baseline and experiment design. Before ending, agree on the required scope, minimum experiments, and any changes. One member records the decisions and the other checks them.
+
+By Nov 11 - A builds the existing CPU backend in Colab and verifies CSR construction on the example. B loads Cora, verifies the split, and writes the dense version of the example. Both confirm the operator signature and output shapes.
+
+By Nov 13 - A runs sparse forward on the hand-worked example and the multi-feature and empty-row cases. B runs one dense GCN training epoch and records the initial loss and epoch time. The team can show a sparse-versus-dense output comparison and a working baseline.
+
+By Nov 16 (course check-in deadline) - A demonstrates the dense-input gradient on a toy case. B tests the masked loss and checks that changing labels outside the training mask leaves the training loss unchanged. Confirm the required check-in form has been submitted with the team's actual progress and any mentor feedback.
+
+By Nov 18 - A completes both backward paths and the fixed-graph operation. B runs the dense and finite-difference gradient checks and verifies that empty rows and repeated coordinates behave as documented. Both review failures before starting performance measurements.
+
+By Nov 20 - B connects the sparse operator to the GCN through the shared training script. A and B reproduce the one-step comparison and run several training epochs with each version. Use pilot times to agree on the final epoch count and number of paired runs.
+
+By Nov 23 - A finishes adjacency storage and peak-memory measurements. B finishes the matched training runs and records per-epoch time, validation accuracy, and test accuracy. Both check that the results table can be traced to saved runs.
+
+By Nov 25 - Record the presentation video. A explains the sparse operator and B presents one correctness result and one measured comparison. Check that the recording is at most 90 seconds.
+By Nov 28 (course deadline) - Submit the video. Both members attend the in-person presentation on the team's assigned day.
+
+By Dec 3 - Complete the roughly 2,000-word Colab report. A writes the storage, kernel, gradient, and memory sections. B writes the model, experimental procedure, and findings. Together explain limitations and add a private downloadable source archive.
+By Dec 5 - Rerun the notebook in a fresh Colab session using the private archive. Verify that the CPU extension builds, the tests pass, and the documented commands reproduce the comparison. Check that the mentor can access the code.
+By Dec 7 (course deadline) - Submit the final Colab report.
+
+Decisions if the schedule slips
+
+If sparse backward is still failing on Nov 18, A will debug the smallest failing example while B continues dense training and prepares the timing and memory scripts. If dense Cora training is slow, use the pilot to choose the same shorter training budget for both models and report it. Keep the two gradient checks, one-step GCN comparison, and measured Cora results as priorities. Additional seeds and a synthetic graph-density sweep can follow if the core results are ready before recording.
+
+Resources
+
+Course requirements and official deadlines, https://dlsyscourse.org/project/
+Kipf and Welling, Semi-Supervised Classification with Graph Convolutional Networks, https://arxiv.org/abs/1609.02907
+Cora files and public split used by the paper's authors, https://github.com/tkipf/gcn/tree/master/gcn/data

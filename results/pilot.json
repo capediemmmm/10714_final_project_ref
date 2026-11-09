@@ -1,0 +1,142 @@
+{
+  "runs": [
+    {
+      "layout": "sparse",
+      "seed": 7,
+      "config": {
+        "hidden": 16,
+        "epochs": 5,
+        "lr": 0.01,
+        "weight_decay": 0.0005,
+        "dropout": 0.5,
+        "warmup": 1,
+        "validation_interval": 5
+      },
+      "graph": {
+        "nodes": 2708,
+        "features": 1433,
+        "classes": 7,
+        "nonzeros": 13264,
+        "train": 140,
+        "validation": 500,
+        "test": 1000
+      },
+      "adjacency_bytes": 116948,
+      "peak_rss_bytes": 111624192,
+      "median_epoch_s": 0.03136920800898224,
+      "selected_epoch": 5,
+      "validation_accuracy": 0.464,
+      "test_accuracy": 0.46,
+      "history": [
+        {
+          "epoch": 1,
+          "loss": 1.9455513954162598,
+          "seconds": 0.03452154202386737
+        },
+        {
+          "epoch": 2,
+          "loss": 1.9391357898712158,
+          "seconds": 0.0319003330077976
+        },
+        {
+          "epoch": 3,
+          "loss": 1.9318040609359741,
+          "seconds": 0.03338437504135072
+        },
+        {
+          "epoch": 4,
+          "loss": 1.922939658164978,
+          "seconds": 0.030838083010166883
+        },
+        {
+          "epoch": 5,
+          "loss": 1.9137870073318481,
+          "seconds": 0.03056862484663725,
+          "val_accuracy": 0.464
+        }
+      ],
+      "environment": {
+        "platform": "macOS-26.6.2-arm64-arm-64bit",
+        "architecture": "arm64",
+        "python": "3.12.14",
+        "numpy": "2.5.4",
+        "scipy": "1.18.1",
+        "backend": "cpu()",
+        "thread_settings": {
+          "OPENBLAS_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        }
+      }
+    },
+    {
+      "layout": "dense",
+      "seed": 7,
+      "config": {
+        "hidden": 16,
+        "epochs": 5,
+        "lr": 0.01,
+        "weight_decay": 0.0005,
+        "dropout": 0.5,
+        "warmup": 1,
+        "validation_interval": 5
+      },
+      "graph": {
+        "nodes": 2708,
+        "features": 1433,
+        "classes": 7,
+        "nonzeros": 13264,
+        "train": 140,
+        "validation": 500,
+        "test": 1000
+      },
+      "adjacency_bytes": 29333056,
+      "peak_rss_bytes": 170049536,
+      "median_epoch_s": 0.1192171040456742,
+      "selected_epoch": 5,
+      "validation_accuracy": 0.464,
+      "test_accuracy": 0.46,
+      "history": [
+        {
+          "epoch": 1,
+          "loss": 1.9455513954162598,
+          "seconds": 0.11835770797915757
+        },
+        {
+          "epoch": 2,
+          "loss": 1.9391357898712158,
+          "seconds": 0.11788308410905302
+        },
+        {
+          "epoch": 3,
+          "loss": 1.9318040609359741,
+          "seconds": 0.11914520803838968
+        },
+        {
+          "epoch": 4,
+          "loss": 1.922939658164978,
+          "seconds": 0.12001583399251103
+        },
+        {
+          "epoch": 5,
+          "loss": 1.9137870073318481,
+          "seconds": 0.11928900005295873,
+          "val_accuracy": 0.464
+        }
+      ],
+      "environment": {
+        "platform": "macOS-26.6.2-arm64-arm-64bit",
+        "architecture": "arm64",
+        "python": "3.12.14",
+        "numpy": "2.5.4",
+        "scipy": "1.18.1",
+        "backend": "cpu()",
+        "thread_settings": {
+          "OPENBLAS_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        }
+      }
+    }
+  ]
+}

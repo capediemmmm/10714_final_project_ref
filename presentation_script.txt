@@ -1,0 +1,19 @@
+Sparse Graph Convolution in Needle
+English narration
+
+Sparse graph convolution in Needle
+Cora has twenty-seven hundred and eight papers. Its normalized graph contains only thirteen thousand two hundred and sixty-four nonzero entries. Our Needle operator visits the stored entries during aggregation.
+
+One operator, two gradients
+Row offsets locate each row. Each stored weight scales one row of input features. Backward scatters to the input features and takes a dot product for each stored weight. Dense reference tests and finite differences check both gradients.
+
+A matched Cora experiment
+Both models use the same normalized graph, weights, training masks, and optimizer. Each layout trained for a hundred epochs on three paired seeds. Validation selected each checkpoint.
+
+Storage and training time
+Compressed sparse row adjacency used a hundred and fourteen kibibytes. Dense adjacency used nearly twenty-eight mebibytes. The median epoch took thirty-two milliseconds with sparse storage and a hundred and twenty-one with dense multiplication.
+
+Accuracy across three seeds
+Test accuracy matched for every paired seed, averaging seventy-nine point eight percent across seeds. The timing reflects Cora on this native Needle CPU backend.
+
+Measurements: results/benchmark.json. Correctness checks: results/tests.txt.
